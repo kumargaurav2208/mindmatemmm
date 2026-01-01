@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindMate - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+        }
+        .container { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem; }
+        .card { background: rgba(255,255,255,0.97); border-radius: 24px; padding: 3rem 2.5rem; box-shadow: 0 30px 60px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.3); width: 100%; max-width: 500px; text-align: center; }
+        .success-icon { font-size: 4rem; margin-bottom: 1rem; }
+        .title { color: #1e293b; font-size: 2rem; font-weight: 800; margin-bottom: 1rem; }
+        .message { color: #64748b; font-size: 1.1rem; margin-bottom: 2rem; line-height: 1.6; }
+        .btn { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 1.2rem 3rem; border: none; border-radius: 25px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; margin-top: 1rem; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(79,172,254,0.5); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="success-icon">✨</div>
+            <h1 class="title">Login Successful!</h1>
+            <p class="message">Welcome back, <strong id="userName">User</strong>! Your mental wellness journey starts now. Let's understand your current emotional state and provide personalized support.</p>
+            <button class="btn" onclick="proceedToAssessment()">Click Here to Proceed</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
+        import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyALOR0CV_cmwf09Vx-27TkYGEvHFUwYOCs",
+            authDomain: "mindmate-b99a2.firebaseapp.com",
+            projectId: "mindmate-b99a2",
+            storageBucket: "mindmate-b99a2.firebasestorage.app",
+            messagingSenderId: "813533002678",
+            appId: "1:813533002678:web:f09f67f9504dee07141f17",
+            measurementId: "G-15KDEXSS61"
+        };
+        
+        window.app = initializeApp(firebaseConfig);
+        window.auth = getAuth(window.app);
+        window.db = getFirestore(window.app);
+
+        // Save user data to Firebase
+        async function saveUserData() {
+            const userId = sessionStorage.getItem('userId');
+            const userName = sessionStorage.getItem('userName');
+            const userEmail = sessionStorage.getItem('userEmail');
+            const guardianEmail = sessionStorage.getItem('guardianEmail');
+            const userAge = sessionStorage.getItem('userAge');
+
+            if (userId) {
+                try {
+                    await setDoc(doc(window.db, 'users', userId), {
+                        name: userName,
+                        email: userEmail,
+                        guardianEmail: guardianEmail,
+                        age: parseInt(userAge),
+                        createdAt: new Date(),
+                        lastLogin: new Date()
+                    });
+                    console.log('User data saved to Firebase');
+                } catch (error) {
+                    console.error('Error saving user data:', error);
+                }
+            }
+        }
+
+        saveUserData();
+    </script>
+
+    <script>
+        if (!sessionStorage.getItem('loggedIn')) {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('userName').textContent = sessionStorage.getItem('userName') || 'User';
+
+        function proceedToAssessment() {
+            window.location.href = 'assessment.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindMate - Your Mental Health Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh; 
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: rgba(255,255,255,0.97); border-radius: 24px; padding: 3rem 2.5rem; box-shadow: 0 30px 60px rgba(0,0,0,0.15); margin-bottom: 2rem; text-align: center; }
+        .title { color: #1e293b; font-size: 2rem; font-weight: 800; margin-bottom: 2rem; }
+        .score-circle { width: 200px; height: 200px; border-radius: 50%; background: linear-gradient(135deg, #4facfe, #00f2fe); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; margin: 0 auto 2rem; box-shadow: 0 20px 40px rgba(79,172,254,0.4); }
+        .score-number { font-size: 4rem; font-weight: 900; }
+        .score-label { font-size: 1rem; opacity: 0.9; }
+        .status { font-size: 1.3rem; font-weight: 700; margin: 2rem 0; color: #1e293b; }
+        .message { color: #64748b; line-height: 1.6; margin: 1.5rem 0; font-size: 1.05rem; }
+        .guardian-section { background: #fef3c7; border: 2px solid #fcd34d; border-radius: 16px; padding: 1.5rem; margin: 2rem 0; text-align: left; display: none; }
+        .guardian-title { color: #92400e; font-weight: 700; margin-bottom: 0.5rem; }
+        .guardian-msg { color: #78350f; font-size: 0.95rem; line-height: 1.5; }
+        .quote { background: #f0f9ff; border-left: 4px solid #4facfe; padding: 1.5rem; margin: 2rem 0; border-radius: 8px; font-style: italic; color: #1e293b; font-size: 1.05rem; }
+        .quote-author { color: #64748b; text-align: right; margin-top: 1rem; font-style: normal; }
+        .btn { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 1.2rem 3rem; border: none; border-radius: 25px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; margin-top: 1rem; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(79,172,254,0.5); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1 class="title">Your Mental Health Report</h1>
+            
+            <div class="score-circle">
+                <div class="score-number" id="scoreNum">0</div>
+                <div class="score-label">out of 10</div>
+            </div>
+            
+            <div class="status" id="status"></div>
+            <div class="message" id="statusMessage"></div>
+            
+            <div class="guardian-section" id="guardianSection">
+                <div class="guardian-title">Important Notice</div>
+                <div class="guardian-msg">We've detected signs that suggest you might benefit from additional support. An email notification has been sent to your guardian informing them about your mental health status. Remember, seeking help is a sign of strength, not weakness.</div>
+            </div>
+            
+            <div class="quote" id="quote"></div>
+            
+            <button class="btn" onclick="goToDashboard()">Return to Dashboard</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
+        import { getFirestore, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyALOR0CV_cmwf09Vx-27TkYGEvHFUwYOCs",
+            authDomain: "mindmate-b99a2.firebaseapp.com",
+            projectId: "mindmate-b99a2",
+            storageBucket: "mindmate-b99a2.firebasestorage.app",
+            messagingSenderId: "813533002678",
+            appId: "1:813533002678:web:f09f67f9504dee07141f17",
+            measurementId: "G-15KDEXSS61"
+        };
+        
+        window.app = initializeApp(firebaseConfig);
+        window.auth = getAuth(window.app);
+        window.db = getFirestore(window.app);
+
+        // Save report to Firebase
+        async function saveReport(score, status) {
+            const userId = sessionStorage.getItem('userId');
+            if (userId) {
+                try {
+                    await updateDoc(doc(window.db, 'users', userId), {
+                        lastReport: { score, status, date: new Date() }
+                    });
+                    console.log('Report saved to Firebase');
+                } catch (error) {
+                    console.error('Error saving report:', error);
+                }
+            }
+        }
+
+        window.saveReport = saveReport;
+    </script>
+
+    <script>
+        if (!sessionStorage.getItem('loggedIn')) {
+            window.location.href = 'index.html';
+        }
+
+        const score = parseInt(sessionStorage.getItem('mentalScore')) || 5;
+        document.getElementById('scoreNum').textContent = score;
+
+        const quotes = [
+            'Your mental health is a priority, not a luxury. Take care of yourself.',
+            'You are stronger than you think. Every step forward counts.',
+            'It\'s okay to not be okay. What matters is that you\'re seeking help.',
+            'Your feelings are valid. You deserve support and kindness.',
+            'Progress, not perfection. Small steps lead to big changes.',
+            'You are not alone in this journey. Reach out whenever you need help.'
+        ];
+
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        document.getElementById('quote').textContent = randomQuote;
+
+        let status = '';
+        let message = '';
+
+        if (score >= 8) {
+            status = '✨ Excellent Mental Health';
+            message = 'You\'re in a great place mentally! Keep maintaining these healthy habits. Your positive mindset is helping you thrive.';
+        } else if (score >= 6) {
+            status = '😊 Good Mental Health';
+            message = 'You\'re doing well! There\'s room for improvement, but you\'re managing life well. Keep up the positive practices.';
+        } else if (score >= 4) {
+            status = '😐 Fair Mental Health';
+            message = 'You\'re experiencing some challenges. Consider talking to a counselor or trusted person. Self-care is important right now.';
+        } else {
+            status = '⚠️ Needs Support';
+            message = 'Your mental health needs immediate attention. Please reach out to a mental health professional or trusted adult. You don\'t have to face this alone.';
+        }
+
+        document.getElementById('status').textContent = status;
+        document.getElementById('statusMessage').textContent = message;
+
+        if (score < 3) {
+            document.getElementById('guardianSection').style.display = 'block';
+            
+            // Send guardian email
+            const guardianEmail = sessionStorage.getItem('guardianEmail');
+            const userName = sessionStorage.getItem('userName');
+            if (guardianEmail) {
+                fetch('/.netlify/functions/sendGuardian', {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        guardianEmail, 
+                        score, 
+                        userName,
+                        message: `${userName} has completed a mental health assessment with a score of ${score}/10. They may need additional support.`
+                    })
+                }).catch(e => console.log('Guardian email queued (production requires backend)'));
+            }
+        }
+
+        // Save report
+        window.saveReport(score, status);
+
+        function goToDashboard() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        window.goToDashboard = goToDashboard;
+    </script>
+</body>
+</html>

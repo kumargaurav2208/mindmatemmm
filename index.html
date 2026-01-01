@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindMate - Mental Wellness Companion</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh; 
+            overflow-x: hidden;
+        }
+        
+        .splash { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 1000; transition: opacity 0.5s ease-out;
+        }
+        .logo { 
+            font-size: clamp(2.8rem, 10vw, 4.5rem); font-weight: 900; 
+            background: linear-gradient(45deg, #fff, #e8f4fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-align: center; margin-bottom: 0.5rem;
+        }
+        .tagline { 
+            color: rgba(255,255,255,0.98); font-size: clamp(1.1rem, 4vw, 1.4rem); font-weight: 500; 
+            text-align: center; padding: 0 1.5rem; letter-spacing: 0.5px;
+        }
+
+        .container { 
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; 
+            padding: clamp(1.5rem, 6vw, 4rem); position: relative; z-index: 1; 
+            opacity: 0; animation: fadeIn 0.5s ease-in 2.5s forwards;
+        }
+        .card { 
+            background: rgba(255,255,255,0.97); backdrop-filter: blur(20px); border-radius: 24px; 
+            padding: clamp(2.5rem, 8vw, 4rem) clamp(2rem, 6vw, 3rem); box-shadow: 0 25px 50px rgba(0,0,0,0.12); 
+            border: 1px solid rgba(255,255,255,0.25); width: 100%; max-width: 450px;
+        }
+        .title { text-align: center; color: #1e293b; font-size: clamp(1.8rem, 6vw, 2.4rem); font-weight: 800; margin-bottom: 1rem; }
+        .subtitle { text-align: center; color: #64748b; margin-bottom: 2.2rem; font-size: clamp(1rem, 3.2vw, 1.15rem); }
+        
+        .form-group { margin-bottom: 1.6rem; position: relative; }
+        label { display: block; color: #334155; font-weight: 600; margin-bottom: 0.7rem; font-size: 0.95rem; }
+        input { width: 100%; padding: 1.1rem 1.4rem; border: 2px solid #e2e8f0; border-radius: 16px; font-size: 1rem; 
+                transition: all 0.3s ease; background: rgba(255,255,255,0.9); font-family: inherit; }
+        input:focus { outline: none; border-color: #4facfe; box-shadow: 0 0 0 4px rgba(79,172,254,0.1); background: white; }
+        input.error { border-color: #ef4444; background: #fef2f2; }
+        .error-msg { color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem; display: none; font-weight: 500; }
+
+        .phone-group { display: flex; gap: 0.5rem; align-items: center; }
+        .flag-icon { font-size: 1.4rem; padding: 0.8rem; flex-shrink: 0; }
+        .phone-code { background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 16px 0 0 16px; padding: 1.1rem 1rem; 
+                      font-weight: 700; color: #475569; min-width: 55px; text-align: center; }
+        input[type="tel"] { border-radius: 0 16px 16px 0; border-left: none; }
+
+        .checkbox-group { display: flex; align-items: flex-start; gap: 1rem; margin: 2rem 0 1.5rem 0; }
+        .checkbox { width: 24px; height: 24px; margin-top: 0.1rem; accent-color: #4facfe; flex-shrink: 0; cursor: pointer; }
+        .checkbox-label { font-size: 0.95rem; color: #64748b; line-height: 1.5; cursor: pointer; }
+        .checkbox-label a { color: #4facfe; text-decoration: none; font-weight: 600; }
+
+        .btn { width: 100%; padding: 1.2rem 1.5rem; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 700; 
+               cursor: pointer; transition: all 0.3s ease; font-family: inherit; }
+        .btn-primary { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; box-shadow: 0 10px 30px rgba(79,172,254,0.4); margin-bottom: 1rem; }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(79,172,254,0.5); }
+        .btn-secondary { background: rgba(255,255,255,0.95); color: #4facfe; border: 2px solid rgba(79,172,254,0.3); }
+        .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .otp-section { display: none; }
+        .otp-title { text-align: center; color: #1e293b; margin-bottom: 1rem; font-size: 1.8rem; font-weight: 700; }
+        .otp-subtitle { text-align: center; color: #64748b; margin-bottom: 2.5rem; font-size: 1rem; }
+        .otp-inputs { display: flex; gap: 1rem; justify-content: center; margin: 2rem 0; flex-wrap: wrap; }
+        .otp-box { width: 60px; height: 60px; font-size: 1.6rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 16px; 
+                   transition: all 0.3s ease; font-weight: 600; font-family: inherit; }
+        .otp-box:focus { border-color: #4facfe; box-shadow: 0 0 0 4px rgba(79,172,254,0.2); background: white; }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+        @media (max-width: 480px) { 
+            .container { padding: 1.5rem 1rem; }
+            .card { padding: 2.5rem 2rem; }
+            .phone-group { flex-direction: column; gap: 0.8rem; }
+            .phone-code { border-radius: 16px; }
+            input[type="tel"] { border-radius: 16px; border-left: 2px solid #e2e8f0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="splash" id="splash">
+        <div class="logo">MindMate</div>
+        <div class="tagline">Your AI Mental Wellness Companion</div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h1 class="title">Welcome to MindMate</h1>
+            <p class="subtitle">Start your wellness journey safely.</p>
+
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" required minlength="2" maxlength="30" placeholder="Enter Your Name">
+                    <div class="error-msg" id="nameError">Name must be 2-30 characters</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" required min="13" max="26" placeholder="Enter age (26 or below)">
+                    <div class="error-msg" id="ageError">Age must be 13-26</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <div class="phone-group">
+                        <div class="flag-icon">🇮🇳</div>
+                        <div class="phone-code">+91</div>
+                        <input type="tel" id="phone" required maxlength="10" placeholder="Enter 10 digit number">
+                    </div>
+                    <div class="error-msg" id="phoneError">Enter valid 10-digit mobile number</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="Write your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="guardianEmail">Guardian Email</label>
+                    <input type="email" id="guardianEmail" required placeholder="Guardian's email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Create Strong Password</label>
+                    <input type="password" id="password" required minlength="8" placeholder="At least 8 characters">
+                    <div class="error-msg" id="passwordError">Password must be 8+ chars with uppercase, number, symbol</div>
+                    <p style="font-size: 0.9rem; color: #64748b; margin-top: 0.5rem; font-style: italic;">
+                        Use uppercase, number, <strong>symbol (!@#$%)</strong>
+                    </p>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="privacy" required class="checkbox">
+                    <label for="privacy" class="checkbox-label">
+                        I agree my information is safe & secure
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Send Verification Code</button>
+                <button type="button" class="btn btn-secondary" onclick="guestMode()">Continue as Guest</button>
+            </form>
+
+            <div class="otp-section" id="otpSection">
+                <h2 class="otp-title">Verify Phone</h2>
+                <p class="otp-subtitle">Enter 6-digit code sent to <span id="phoneDisplay" style="font-weight: 700;"></span></p>
+                
+                <div id="recaptcha-container" style="margin: 1rem 0;"></div>
+                
+                <div class="otp-inputs">
+                    <input type="text" class="otp-box" maxlength="1">
+                    <input type="text" class="otp-box" maxlength="1">
+                    <input type="text" class="otp-box" maxlength="1">
+                    <input type="text" class="otp-box" maxlength="1">
+                    <input type="text" class="otp-box" maxlength="1">
+                    <input type="text" class="otp-box" maxlength="1">
+                </div>
+                
+                <button class="btn btn-primary" onclick="verifyOTP()">Complete Login</button>
+                <button class="btn btn-secondary" onclick="backToForm()" style="margin-top: 1rem;">Change Number</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
+        import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
+        import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyALOR0CV_cmwf09Vx-27TkYGEvHFUwYOCs",
+            authDomain: "mindmate-b99a2.firebaseapp.com",
+            projectId: "mindmate-b99a2",
+            storageBucket: "mindmate-b99a2.firebasestorage.app",
+            messagingSenderId: "813533002678",
+            appId: "1:813533002678:web:f09f67f9504dee07141f17",
+            measurementId: "G-15KDEXSS61"
+        };
+        
+        window.app = initializeApp(firebaseConfig);
+        window.auth = getAuth(window.app);
+        window.db = getFirestore(window.app);
+    </script>
+
+    <script>
+        setTimeout(() => {
+            document.getElementById('splash').style.opacity = '0';
+            setTimeout(() => document.getElementById('splash').style.display = 'none', 500);
+        }, 2500);
+
+        const passwordRegex = /(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}/;
+        const phoneRegex = /^[6-9]\d{9}$/;
+
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateForm()) {
+                const phone = '+91' + document.getElementById('phone').value;
+                
+                window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+                    size: 'invisible'
+                }, window.auth);
+                
+                signInWithPhoneNumber(window.auth, phone, window.recaptchaVerifier)
+                    .then(confirmationResult => {
+                        window.confirmationResult = confirmationResult;
+                        document.getElementById('phoneDisplay').textContent = phone;
+                        document.getElementById('signupForm').style.display = 'none';
+                        document.getElementById('otpSection').style.display = 'block';
+                        
+                        sessionStorage.setItem('userName', document.getElementById('name').value);
+                        sessionStorage.setItem('userAge', document.getElementById('age').value);
+                        sessionStorage.setItem('userEmail', document.getElementById('email').value);
+                        sessionStorage.setItem('guardianEmail', document.getElementById('guardianEmail').value);
+                    }).catch(error => {
+                        alert('OTP Send Failed: ' + error.message);
+                    });
+            }
+        });
+
+        function validateForm() {
+            let valid = true;
+            clearErrors();
+
+            const name = document.getElementById('name').value.trim();
+            if (name.length < 2) { showError('name', 'Name too short'); valid = false; }
+
+            const age = parseInt(document.getElementById('age').value);
+            if (age < 13 || age > 26) { showError('age', 'Age must be 13-26'); valid = false; }
+
+            const phone = document.getElementById('phone').value.replace(/\s/g, '');
+            if (!phoneRegex.test(phone)) { showError('phone', 'Invalid mobile number'); valid = false; }
+
+            const password = document.getElementById('password').value;
+            if (!passwordRegex.test(password)) { showError('password', 'Weak password'); valid = false; }
+
+            return valid;
+        }
+
+        function showError(field, message) {
+            document.getElementById(field).classList.add('error');
+            document.getElementById(field + 'Error').textContent = message;
+            document.getElementById(field + 'Error').style.display = 'block';
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
+            document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
+        }
+
+        function verifyOTP() {
+            const otpInputs = document.querySelectorAll('.otp-box');
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+            
+            if (otp.length === 6) {
+                window.confirmationResult.confirm(otp)
+                    .then(result => {
+                        sessionStorage.setItem('loggedIn', 'true');
+                        sessionStorage.setItem('userId', result.user.uid);
+                        window.location.href = 'dashboard.html';
+                    }).catch(error => {
+                        alert('Invalid OTP: ' + error.message);
+                    });
+            }
+        }
+
+        function backToForm() {
+            document.getElementById('otpSection').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'block';
+            document.querySelectorAll('.otp-box').forEach(input => input.value = '');
+        }
+
+        function guestMode() {
+            sessionStorage.setItem('userName', 'Guest');
+            sessionStorage.setItem('loggedIn', 'true');
+            window.location.href = 'dashboard.html';
+        }
+
+        document.getElementById('phone').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+        });
+
+        document.querySelectorAll('.otp-box').forEach((input, index) => {
+            input.addEventListener('input', function() {
+                if (this.value.length === 1 && index < 5) {
+                    document.querySelectorAll('.otp-box')[index + 1].focus();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
