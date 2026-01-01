@@ -1,0 +1,1 @@
+MindMate is an AI-powered mobile/web app that acts as a personal mental wellness companion. It offers mood tracking, journaling, and emotional support through a conversational interface. It encourages self-reflection, provides motivational nudges, and connects users with helpful resources.
